@@ -1,7 +1,9 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const { Pool } = require("@neondatabase/serverless");
+// Correct content for: /server.js
+
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import { sql } from "./config/db.js"; 
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -9,15 +11,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-});
+async function initDB() {
+    try {
+        await sql`CREATE TABLE IF NOT EXISTS Transactions (
+            id SERIAL PRIMARY KEY,
+            user_id VARCHAR(255) NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            amount DECIMAL(10,2) NOT NULL,
+            category VARCHAR(255) NOT NULL,
+            created_at DATE NOT NULL DEFAULT CURRENT_DATE
+        )`;
+
+        console.log("Database initialized successfully ✅");
+    } catch (error) {
+        console.log("Database initialization failed ❌", error);
+        process.exit(1);
+    }
+}
+
 
 app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+initDB().then(() => {
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
 });
