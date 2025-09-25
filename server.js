@@ -4,10 +4,13 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { sql } from "./config/db.js"; 
+import mountRoutes from "./routes/index.js";
+import morgan from "morgan";
 
 dotenv.config();
 const port = process.env.PORT || 3000;
 const app = express();
+app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
 
@@ -33,6 +36,9 @@ async function initDB() {
 app.get("/", (req, res) => {
     res.send("Hello World!");
 });
+
+// Mount Routes
+mountRoutes(app);
 
 initDB().then(() => {
     app.listen(port, () => {
