@@ -63,9 +63,9 @@ export const sumTransactions = async (req, res) => {
         const income = await sql`SELECT COALESCE(SUM(amount), 0) as income FROM Transactions WHERE user_id = ${user_id} AND amount > 0`;
         const expense = await sql`SELECT COALESCE(SUM(amount), 0) as expense FROM Transactions WHERE user_id = ${user_id} AND amount < 0`;
         return res.status(200).json({
-            balance : balance[0].balance,
-            income : income[0].income,
-            expense : expense[0].expense
+            balance: balance[0].balance,
+            income: income[0].income,
+            expense: expense[0].expense
         });
     } catch (error) {
         console.log("transactionService.js -> sumTransactions -> error :", error);
