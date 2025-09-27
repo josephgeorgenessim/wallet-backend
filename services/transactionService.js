@@ -36,7 +36,7 @@ export const createTransaction = async (req, res) => {
 export const deleteTransaction = async (req, res) => {
     try {
         const { transaction_id } = req.params;
-        if(!transaction_id || !Number(transaction_id)){
+        if (!transaction_id || !Number(transaction_id)) {
             return res.status(400).json({ error: "Missing transaction id" });
         }
         const result = await sql`DELETE FROM Transactions WHERE id = ${transaction_id} RETURNING *`;
@@ -48,5 +48,27 @@ export const deleteTransaction = async (req, res) => {
     } catch (error) {
         console.log("transactionService.js -> deleteTransaction -> error :", error);
         res.status(500).json({ error: "Failed to delete transaction." });
+    }
+};
+
+
+export const sumTransactions = async (req, res) => {
+    try {
+        const { user_id } = req.params;
+        const isUserIdHere = await sql`SELECT * FROM Transactions WHERE user_id = ${user_id}`;
+        if (!isUserIdHere.length || !user_id || !Number(user_id)) {
+            return res.status(404).json({ error: "No user found." });
+        }
+        const balance = await sql`SELECT COALESCE(SUM(amount), 0) as balance FROM Transactions WHERE user_id = ${user_id}`;
+        const income = await sql`SELECT COALESCE(SUM(amount), 0) as income FROM Transactions WHERE user_id = ${user_id} AND amount > 0`;
+        const expense = await sql`SELECT COALESCE(SUM(amount), 0) as expense FROM Transactions WHERE user_id = ${user_id} AND amount < 0`;
+        return res.status(200).json({
+            balance : balance[0].balance,
+            income : income[0].income,
+            expense : expense[0].expense
+        });
+    } catch (error) {
+        console.log("transactionService.js -> sumTransactions -> error :", error);
+        res.status(500).json({ error: "Failed to sum transactions." });
     }
 };
