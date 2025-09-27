@@ -6,10 +6,12 @@ import cors from "cors";
 import { sql } from "./config/db.js"; 
 import mountRoutes from "./routes/index.js";
 import morgan from "morgan";
+import { rateLimiterMiddleware } from "./middleware/rateLimiter.js";
 
 dotenv.config();
 const port = process.env.PORT || 3000;
 const app = express();
+app.use(rateLimiterMiddleware);
 app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
