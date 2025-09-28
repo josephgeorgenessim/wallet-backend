@@ -3,13 +3,13 @@ import { sql } from "../config/db.js";
 export const getTransactions = async (req, res) => {
     try {
         const { user_id } = req.params;
-        const [rows] = await sql`SELECT * FROM Transactions WHERE user_id = ${user_id} order by created_at desc`;
+        const result = await sql`SELECT * FROM Transactions WHERE user_id = ${user_id} order by created_at DESC`;
 
-        if (!rows) {
+        if (!result.length) {
             return res.status(404).json({ error: "No transactions found." });
         }
 
-        return res.status(200).json(rows);
+        return res.status(200).json(result);
     } catch (error) {
         console.log("transactionService.js -> getTransactions -> error :", error);
         res.status(500).json({ error: "Failed to get transactions." });
@@ -56,7 +56,7 @@ export const sumTransactions = async (req, res) => {
     try {
         const { user_id } = req.params;
         const isUserIdHere = await sql`SELECT * FROM Transactions WHERE user_id = ${user_id}`;
-        if (!isUserIdHere.length || !user_id || !Number(user_id)) {
+        if (!isUserIdHere.length || !user_id ) {
             return res.status(404).json({ error: "No user found." });
         }
         const balance = await sql`SELECT COALESCE(SUM(amount), 0) as balance FROM Transactions WHERE user_id = ${user_id}`;
@@ -65,7 +65,7 @@ export const sumTransactions = async (req, res) => {
         return res.status(200).json({
             balance: balance[0].balance,
             income: income[0].income,
-            expense: expense[0].expense
+            expenses: expense[0].expense
         });
     } catch (error) {
         console.log("transactionService.js -> sumTransactions -> error :", error);
